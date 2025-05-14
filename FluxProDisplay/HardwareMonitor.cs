@@ -4,7 +4,7 @@ namespace FluxProDisplay;
 
 public class HardwareMonitor
 {
-    public Computer Computer;
+    public readonly Computer Computer;
 
     public HardwareMonitor()
     {
@@ -21,25 +21,6 @@ public class HardwareMonitor
 
     public float? GetCpuTemperature()
     {
-        foreach (IHardware hardware in Computer.Hardware)
-        {
-            Console.WriteLine("Hardware: {0}", hardware.Name);
-
-            foreach (IHardware subhardware in hardware.SubHardware)
-            {
-                Console.WriteLine("\tSubhardware: {0}", subhardware.Name);
-
-                foreach (ISensor sensor in subhardware.Sensors)
-                {
-                    Console.WriteLine("\t\tSensor: {0}, value: {1}", sensor.Name, sensor.Value);
-                }
-            }
-
-            foreach (ISensor sensor in hardware.Sensors)
-            {
-                Console.WriteLine("\tSensor: {0}, value: {1}", sensor.Name, sensor.Value);
-            }
-        }
 
         foreach (var hardware in Computer.Hardware)
         {
@@ -49,8 +30,31 @@ public class HardwareMonitor
 
                 foreach (var sensor in hardware.Sensors)
                 {
-                    if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Core"))
+                    if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Tctl/Tdie"))
                     {
+                        return sensor.Value;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public float? GetGpuTemperature()
+    {
+        foreach (var hardware in Computer.Hardware)
+        {
+            if (hardware.HardwareType is HardwareType.GpuNvidia or HardwareType.GpuAmd or HardwareType.GpuIntel)
+            {
+                hardware.Update();
+
+                foreach (var sensor in hardware.Sensors)
+                {
+                    if (sensor.SensorType == SensorType.Temperature &&
+                        sensor.Name.Contains("GPU Core", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var test = sensor.Value;
                         return sensor.Value;
                     }
                 }

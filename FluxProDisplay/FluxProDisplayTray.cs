@@ -52,15 +52,37 @@ public partial class FluxProDisplayTray : Form
         payload[4] = 1;
         payload[5] = 6;
 
-        // representation of numbers
-        Console.WriteLine(Monitor.GetCpuTemperature());
-        payload[6] = 2;
-        payload[7] = 4;
-        payload[8] = 0;
-        payload[9] = 1;
-        payload[10] = 6;
-        payload[11] = 0;
-        payload[12] = 20;
+        return FormattedPayload(payload, Monitor.GetCpuTemperature(), Monitor.GetGpuTemperature());
+    }
+
+    private byte[] FormattedPayload(byte[] payload, float? cpuTemperature, float? gpuTemperature)
+    {
+        var roundedCpuTemp = Math.Round(cpuTemperature ?? 0, 1);
+        var roundedGpuTemp = Math.Round(gpuTemperature ?? 0, 1);
+
+        var wholeNumCpuTemp = (int)roundedCpuTemp;
+        var tensPlaceCpuTemp = wholeNumCpuTemp / 10;
+        var onesPlaceCpuTemp = wholeNumCpuTemp % 10;
+        var tenthsPlaceCpuTemp = (int)((roundedCpuTemp - wholeNumCpuTemp) * 10);
+
+        var wholeNumGpuTemp = (int)roundedGpuTemp;
+        var tensPlaceGpuTemp = wholeNumGpuTemp / 10;
+        var onesPlaceGpuTemp = wholeNumGpuTemp % 10;
+        var tenthsPlaceGpuTemp = (int)((roundedGpuTemp - wholeNumGpuTemp) * 10);
+
+
+        payload[6] = (byte)tensPlaceCpuTemp;
+        payload[7] = (byte)onesPlaceCpuTemp;
+        payload[8] = (byte)tenthsPlaceCpuTemp;
+
+        payload[9] = (byte)tensPlaceGpuTemp;
+        payload[10] = (byte)onesPlaceGpuTemp;
+        payload[11] = (byte)tenthsPlaceGpuTemp;
+
+        // generate checksum per item that is sent to the display
+        byte checksum = payload.Aggregate<byte, byte>(0, (current, b) => (byte)(current + b));
+
+        payload[12] = checksum;
 
         return payload;
     }
