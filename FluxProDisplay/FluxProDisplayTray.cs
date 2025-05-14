@@ -1,24 +1,42 @@
-using System;
+using System.ComponentModel;
 using HidLibrary;
 
 namespace FluxProDisplay;
 
 public partial class FluxProDisplayTray : Form
 {
-    public HidDevice? Device;
     public HardwareMonitor Monitor;
 
     // offload to appsettings
     private const int PollingInterval = 1;
-    const int VendorId = 0x2022;
-    const int ProductId = 0x0522;
+    private const int VendorId = 0x2022;
+    private const int ProductId = 0x0522;
+
+    // other UI components for the tab
+    private NotifyIcon _batteryStatus = null!;
+    private Container _component = null!;
+    private ContextMenuStrip _contextMenuStrip = null!;
 
     public FluxProDisplayTray()
     {
         InitializeComponent();
 
         Monitor = new HardwareMonitor();
+
         _ = WriteToDisplay();
+    }
+
+    /// <summary>
+    /// Hides the main window on startup.
+    /// </summary>
+    /// <param name="value"></param>
+    protected override void SetVisibleCore(bool value)
+    {
+        if (!IsHandleCreated) {
+            value = false;
+            CreateHandle();
+        }
+        base.SetVisibleCore(value);
     }
 
     private async Task WriteToDisplay()
@@ -41,8 +59,8 @@ public partial class FluxProDisplayTray : Form
     /// <returns></returns>
     private byte[] GeneratePayload(HidDevice device)
     {
-        int reportLength = device.Capabilities.OutputReportByteLength;
-        byte[] payload = new byte[reportLength];
+        var reportLength = device.Capabilities.OutputReportByteLength;
+        var payload = new byte[reportLength];
 
         // reporting number, and other information needed to send to the display
         payload[0] = 0;
@@ -52,10 +70,17 @@ public partial class FluxProDisplayTray : Form
         payload[4] = 1;
         payload[5] = 6;
 
-        return FormattedPayload(payload, Monitor.GetCpuTemperature(), Monitor.GetGpuTemperature());
+        return FormatDisplayPayload(payload, Monitor.GetCpuTemperature(), Monitor.GetGpuTemperature());
     }
 
-    private byte[] FormattedPayload(byte[] payload, float? cpuTemperature, float? gpuTemperature)
+    /// <summary>
+    /// formats the payload correctly to send information to the antec flux pro display.
+    /// </summary>
+    /// <param name="payload"></param>
+    /// <param name="cpuTemperature"></param>
+    /// <param name="gpuTemperature"></param>
+    /// <returns></returns>
+    private byte[] FormatDisplayPayload(byte[] payload, float? cpuTemperature, float? gpuTemperature)
     {
         var roundedCpuTemp = Math.Round(cpuTemperature ?? 0, 1);
         var roundedGpuTemp = Math.Round(gpuTemperature ?? 0, 1);
@@ -70,7 +95,6 @@ public partial class FluxProDisplayTray : Form
         var onesPlaceGpuTemp = wholeNumGpuTemp % 10;
         var tenthsPlaceGpuTemp = (int)((roundedGpuTemp - wholeNumGpuTemp) * 10);
 
-
         payload[6] = (byte)tensPlaceCpuTemp;
         payload[7] = (byte)onesPlaceCpuTemp;
         payload[8] = (byte)tenthsPlaceCpuTemp;
@@ -80,8 +104,7 @@ public partial class FluxProDisplayTray : Form
         payload[11] = (byte)tenthsPlaceGpuTemp;
 
         // generate checksum per item that is sent to the display
-        byte checksum = payload.Aggregate<byte, byte>(0, (current, b) => (byte)(current + b));
-
+        var checksum = payload.Aggregate<byte, byte>(0, (current, b) => (byte)(current + b));
         payload[12] = checksum;
 
         return payload;
