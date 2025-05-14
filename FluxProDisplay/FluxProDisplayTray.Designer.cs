@@ -1,6 +1,6 @@
 ﻿namespace FluxProDisplay;
 
-partial class Form1
+partial class FluxProDisplayTray
 {
     /// <summary>
     ///  Required designer variable.
