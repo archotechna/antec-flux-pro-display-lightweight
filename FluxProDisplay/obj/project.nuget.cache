@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "RZJAkss4DmI=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\userspace\\RiderProjects\\FluxProDisplay\\FluxProDisplay\\FluxProDisplay.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\userspace\\.nuget\\packages\\hidlibrary\\3.3.40\\hidlibrary.3.3.40.nupkg.sha512"
+  ],
+  "logs": []
+}
