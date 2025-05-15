@@ -15,4 +15,10 @@
       <PackageReference Include="System.Threading" Version="4.3.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="assets\segmentdisplay.ico">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

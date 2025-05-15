@@ -6,6 +6,8 @@ namespace FluxProDisplay;
 public partial class FluxProDisplayTray : Form
 {
     public HardwareMonitor Monitor;
+    public bool ConnectionStatus = false;
+    public ToolStripLabel? ConnectionStatusLabel;
 
     // offload to appsettings
     private const int PollingInterval = 1;
@@ -13,7 +15,7 @@ public partial class FluxProDisplayTray : Form
     private const int ProductId = 0x0522;
 
     // other UI components for the tab
-    private NotifyIcon _batteryStatus = null!;
+    private NotifyIcon _appStatusNotifyIcon = null!;
     private Container _component = null!;
     private ContextMenuStrip _contextMenuStrip = null!;
 
@@ -23,7 +25,47 @@ public partial class FluxProDisplayTray : Form
 
         Monitor = new HardwareMonitor();
 
+        SetUpTrayIcon();
+
         _ = WriteToDisplay();
+    }
+
+    private void SetUpTrayIcon()
+    {
+        _component = new Container();
+        _appStatusNotifyIcon = new NotifyIcon(_component);
+        _appStatusNotifyIcon.Visible = true;
+
+        _contextMenuStrip = new ContextMenuStrip();
+
+        var appNameLabel = new ToolStripLabel("Antec Flux Pro Display Service");
+        appNameLabel.ForeColor = Color.Gray;
+        appNameLabel.Enabled = false;
+        _contextMenuStrip.Items.Add(appNameLabel);
+
+        _contextMenuStrip.Items.Add(new ToolStripSeparator());
+
+        ConnectionStatusLabel = new ToolStripLabel("Not Connected");
+        ConnectionStatusLabel.ForeColor = Color.Crimson;
+        ConnectionStatusLabel.Enabled = true;
+        _contextMenuStrip.Items.Add(ConnectionStatusLabel);
+
+        // menu items
+        var quitMenuItem = new ToolStripMenuItem("Quit");
+        quitMenuItem.Click += QuitMenuItem_Click!;
+
+        // separator to separate
+        _contextMenuStrip.Items.Add(new ToolStripSeparator());
+        _contextMenuStrip.Items.Add(quitMenuItem);
+
+        _appStatusNotifyIcon.ContextMenuStrip = _contextMenuStrip;
+
+        _appStatusNotifyIcon.Icon = new Icon("assets/segmentdisplay.ico");
+    }
+
+    private void QuitMenuItem_Click(object sender, EventArgs e)
+    {
+        Application.Exit();
     }
 
     /// <summary>
@@ -45,6 +87,12 @@ public partial class FluxProDisplayTray : Form
         var timer = new PeriodicTimer(TimeSpan.FromSeconds(PollingInterval));
 
         var device = HidDevices.Enumerate(VendorId, ProductId).FirstOrDefault();
+
+        if (device != null)
+        {
+            ConnectionStatusLabel!.Text = "Connected";
+            ConnectionStatusLabel.ForeColor = Color.Green;
+        }
 
         do
         {
