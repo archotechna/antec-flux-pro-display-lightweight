@@ -7,6 +7,8 @@
         <UseWindowsForms>true</UseWindowsForms>
         <ImplicitUsings>enable</ImplicitUsings>
         <ApplicationManifest>app.manifest</ApplicationManifest>
+        <PublishSingleFile>true</PublishSingleFile>
+        <ApplicationIcon>assets\sevensegmentmed.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,10 +19,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="assets\segmentdisplay.ico">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
       <None Update="app.manifest">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="assets\sevensegment2.ico">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="assets\sevensegmentmed.ico">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

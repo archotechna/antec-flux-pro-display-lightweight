@@ -60,7 +60,7 @@ public partial class FluxProDisplayTray : Form
 
         _appStatusNotifyIcon.ContextMenuStrip = _contextMenuStrip;
 
-        _appStatusNotifyIcon.Icon = new Icon("assets/segmentdisplay.ico");
+        _appStatusNotifyIcon.Icon = new Icon("assets/sevensegment2.ico");
     }
 
     private void QuitMenuItem_Click(object sender, EventArgs e)
