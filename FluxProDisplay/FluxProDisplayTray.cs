@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using HidLibrary;
+using Microsoft.Win32;
 
 namespace FluxProDisplay;
 
@@ -8,6 +9,8 @@ public partial class FluxProDisplayTray : Form
     public HardwareMonitor Monitor;
     public bool ConnectionStatus = false;
     public ToolStripLabel? ConnectionStatusLabel;
+    public ToolStripMenuItem? StartupToggleMenuItem;
+    public string AppName = "FluxProDisplay";
 
     // offload to appsettings
     private const int PollingInterval = 1;
@@ -51,16 +54,54 @@ public partial class FluxProDisplayTray : Form
         _contextMenuStrip.Items.Add(ConnectionStatusLabel);
 
         // menu items
+        StartupToggleMenuItem = new ToolStripMenuItem();
+        StartupToggleMenuItem.Click += StartupToggleMenuItemClicked;
+
         var quitMenuItem = new ToolStripMenuItem("Quit");
         quitMenuItem.Click += QuitMenuItem_Click!;
 
         // separator to separate
         _contextMenuStrip.Items.Add(new ToolStripSeparator());
+        _contextMenuStrip.Items.Add(StartupToggleMenuItem);
         _contextMenuStrip.Items.Add(quitMenuItem);
 
         _appStatusNotifyIcon.ContextMenuStrip = _contextMenuStrip;
 
+        UpdateStartupMenuItemText();
+
         _appStatusNotifyIcon.Icon = new Icon("assets/sevensegment2.ico");
+    }
+
+    private void StartupToggleMenuItemClicked(object? sender, EventArgs e)
+    {
+        var exePath = Application.ExecutablePath;
+
+        using (var key = Registry.CurrentUser.OpenSubKey(
+                   @"Software\Microsoft\Windows\CurrentVersion\Run", true))
+        {
+            bool isEnabled = key?.GetValue(AppName) != null;
+
+            if (isEnabled)
+            {
+                key?.DeleteValue(AppName);
+            }
+            else
+            {
+                key?.SetValue(AppName, $"\"{exePath}\"");
+            }
+        }
+
+        UpdateStartupMenuItemText();
+    }
+
+    private void UpdateStartupMenuItemText()
+    {
+        using (var key = Registry.CurrentUser.OpenSubKey(
+                   @"Software\Microsoft\Windows\CurrentVersion\Run", false))
+        {
+            var isEnabled = key?.GetValue(AppName) != null;
+            StartupToggleMenuItem!.Text = isEnabled ? "✓ Start with Windows" : "Start with Windows";
+        }
     }
 
     private void QuitMenuItem_Click(object sender, EventArgs e)
