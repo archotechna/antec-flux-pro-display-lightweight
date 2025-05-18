@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using HidLibrary;
 using Microsoft.Win32;
 
@@ -26,11 +27,26 @@ public partial class FluxProDisplayTray : Form
     {
         InitializeComponent();
 
+        // check if iUnity is running to prevent conflicts.
+        CheckForIUnity();
+
         Monitor = new HardwareMonitor();
 
         SetUpTrayIcon();
 
         _ = WriteToDisplay();
+    }
+
+    private void CheckForIUnity()
+    {
+        var isRunning =
+            Process.GetProcessesByName("iunity").Length > 0 ||
+            Process.GetProcessesByName("AntecHardwareMonitorWindowsService").Length > 0;
+
+        if (!isRunning) return;
+
+        MessageBox.Show("iUnity is running, please end the iUnity program and its related processes from task manager and try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        Environment.Exit(0);
     }
 
     private void SetUpTrayIcon()
