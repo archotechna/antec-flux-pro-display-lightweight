@@ -145,6 +145,8 @@ public partial class FluxProDisplayTray : Form
 
         var device = HidDevices.Enumerate(VendorId, ProductId).FirstOrDefault();
 
+        var sensors = Monitor.GetCpuTemperature();
+
         if (device != null)
         {
             ConnectionStatusLabel!.Text = "Connected";
