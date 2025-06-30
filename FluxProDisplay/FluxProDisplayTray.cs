@@ -2,6 +2,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using HidLibrary;
 using Microsoft.Win32;
+using Microsoft.Win32.TaskScheduler;
+using Task = System.Threading.Tasks.Task;
 
 namespace FluxProDisplay;
 
@@ -12,6 +14,7 @@ public partial class FluxProDisplayTray : Form
     public ToolStripLabel? ConnectionStatusLabel;
     public ToolStripMenuItem? StartupToggleMenuItem;
     public string AppName = "FluxProDisplay";
+    const string TaskName = "FluxProDisplayElevatedTask";
 
     // offload to appsettings
     private const int PollingInterval = 1;
@@ -92,18 +95,26 @@ public partial class FluxProDisplayTray : Form
     {
         var exePath = Application.ExecutablePath;
 
-        using (var key = Registry.CurrentUser.OpenSubKey(
-                   @"Software\Microsoft\Windows\CurrentVersion\Run", true))
+        using (var ts = new TaskService())
         {
-            bool isEnabled = key?.GetValue(AppName) != null;
+            var task = ts.FindTask(TaskName);
 
-            if (isEnabled)
+            if (task != null)
             {
-                key?.DeleteValue(AppName);
+                ts.RootFolder.DeleteTask(TaskName);
             }
             else
             {
-                key?.SetValue(AppName, $"\"{exePath}\"");
+                var td = ts.NewTask();
+
+                td.RegistrationInfo.Description = "Flux Pro Display Service Task with Admin Privileges";
+                td.Principal.RunLevel = TaskRunLevel.Highest;
+                td.Principal.LogonType = TaskLogonType.InteractiveToken;
+
+                td.Triggers.Add(new LogonTrigger());
+                td.Actions.Add(new ExecAction(exePath, null, Path.GetDirectoryName(exePath)));
+
+                ts.RootFolder.RegisterTaskDefinition(TaskName, td);
             }
         }
 
@@ -112,12 +123,9 @@ public partial class FluxProDisplayTray : Form
 
     private void UpdateStartupMenuItemText()
     {
-        using (var key = Registry.CurrentUser.OpenSubKey(
-                   @"Software\Microsoft\Windows\CurrentVersion\Run", false))
-        {
-            var isEnabled = key?.GetValue(AppName) != null;
-            StartupToggleMenuItem!.Text = isEnabled ? "✓ Start with Windows" : "Start with Windows";
-        }
+        using var ts = new TaskService();
+        var taskEnabled = ts.FindTask(TaskName, true) != null;
+        StartupToggleMenuItem!.Text = taskEnabled ? "✓ Start with Windows" : "Start with Windows";
     }
 
     private void QuitMenuItem_Click(object sender, EventArgs e)

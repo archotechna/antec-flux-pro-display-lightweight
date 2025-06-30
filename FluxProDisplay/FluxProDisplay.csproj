@@ -16,6 +16,7 @@
       <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.5-pre419" />
       <PackageReference Include="System.Management" Version="9.0.6" />
       <PackageReference Include="System.Threading" Version="4.3.0" />
+      <PackageReference Include="TaskScheduler" Version="2.12.1" />
     </ItemGroup>
 
     <ItemGroup>

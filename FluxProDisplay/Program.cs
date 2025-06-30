@@ -11,23 +11,36 @@ static class Program
     [STAThread]
     static void Main()
     {
-        bool createdNew;
-
-        // use a mutex to only ever allow 1 instance of FluxProDisplay
-        using (new Mutex(true, MutexName, out createdNew))
+        try
         {
-            if (!createdNew)
+            using (new Mutex(true, MutexName, out var createdNew))
             {
-                MessageBox.Show(
-                    "Another instance of FluxProDisplay is already running.",
-                    "Instance Running",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-                return;
-            }
+                if (!createdNew)
+                {
+                    MessageBox.Show(
+                        "Another instance of FluxProDisplay is already running.",
+                        "Instance Running",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
 
-            ApplicationConfiguration.Initialize();
-            Application.Run(new FluxProDisplayTray());
+                ApplicationConfiguration.Initialize();
+                Application.Run(new FluxProDisplayTray());
+            }
+        }
+        catch (Exception ex)
+        {
+            // debug logs for this are located in %APPDATA%\FluxProDisplay\error.log
+            var logPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "FluxProDisplay",
+                "error.log");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
+            File.WriteAllText(logPath, ex.ToString());
+
+            throw;
         }
     }
 }
