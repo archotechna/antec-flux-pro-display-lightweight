@@ -30,7 +30,10 @@ public class HardwareMonitor
 
                 foreach (var sensor in hardware.Sensors)
                 {
-                    if (sensor.SensorType == SensorType.Temperature && (sensor.Name.Contains("Tctl/Tdie") || sensor.Name.Contains("CPU Package")))
+                    if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Tctl") || sensor.Name.Contains("Tdie") 
+                            || sensor.Name.Contains("Package") 
+                            || sensor.Name.Contains("Core")
+                        )
                     {
                         return sensor.Value;
                     }
