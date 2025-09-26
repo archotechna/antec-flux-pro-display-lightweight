@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using HidLibrary;
-using Microsoft.Win32;
 using Microsoft.Win32.TaskScheduler;
 using Task = System.Threading.Tasks.Task;
 
@@ -124,7 +123,7 @@ public partial class FluxProDisplayTray : Form
     private void UpdateStartupMenuItemText()
     {
         using var ts = new TaskService();
-        var taskEnabled = ts.FindTask(TaskName, true) != null;
+        var taskEnabled = ts.FindTask(TaskName) != null;
         StartupToggleMenuItem!.Text = taskEnabled ? "✓ Start with Windows" : "Start with Windows";
     }
 

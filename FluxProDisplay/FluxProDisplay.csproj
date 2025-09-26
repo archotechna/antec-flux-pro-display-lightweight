@@ -13,8 +13,8 @@
 
     <ItemGroup>
       <PackageReference Include="hidlibrary" Version="3.3.40" />
-      <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.5-pre419" />
-      <PackageReference Include="System.Management" Version="9.0.6" />
+      <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.5-pre478" />
+      <PackageReference Include="System.Management" Version="9.0.9" />
       <PackageReference Include="System.Threading" Version="4.3.0" />
       <PackageReference Include="TaskScheduler" Version="2.12.1" />
     </ItemGroup>
