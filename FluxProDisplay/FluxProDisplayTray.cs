@@ -87,7 +87,7 @@ public partial class FluxProDisplayTray : Form
 
         UpdateStartupMenuItemText();
 
-        _appStatusNotifyIcon.Icon = new Icon("assets/sevensegment2.ico");
+        _appStatusNotifyIcon.Icon = new Icon("assets/icon_disconnected.ico");
     }
 
     private void StartupToggleMenuItemClicked(object? sender, EventArgs e)
@@ -155,7 +155,14 @@ public partial class FluxProDisplayTray : Form
         if (device != null)
         {
             ConnectionStatusLabel!.Text = "Connected";
+            _appStatusNotifyIcon.Icon = new Icon("assets/icon_connected.ico");
             ConnectionStatusLabel.ForeColor = Color.Green;
+        }
+        else
+        {
+            ConnectionStatusLabel!.Text = "Not Connected";
+            _appStatusNotifyIcon.Icon = new Icon("assets/icon_disconnected.ico");
+            ConnectionStatusLabel.ForeColor = Color.Crimson;
         }
 
         do

@@ -8,7 +8,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <PublishSingleFile>true</PublishSingleFile>
-        <ApplicationIcon>assets\sevensegmentmed.ico</ApplicationIcon>
+        <ApplicationIcon>assets\app_icon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,10 +23,13 @@
       <None Update="app.manifest">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="assets\sevensegment2.ico">
+      <None Update="assets\app_icon.ico">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="assets\sevensegmentmed.ico">
+      <None Update="assets\icon_connected.ico">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="assets\icon_disconnected.ico">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
