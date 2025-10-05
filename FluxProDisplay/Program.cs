@@ -1,15 +1,18 @@
+using FluxProDisplay.DTOs.AppSettings;
+using Microsoft.Extensions.Configuration;
+
 namespace FluxProDisplay;
 
-static class Program
+internal static class Program
 {
     // name of the mutex
-    private static readonly string MutexName = "FluxProDisplay_SingleInstance_Mutex";
+    private const string MutexName = "FluxProDisplay_SingleInstance_Mutex";
 
     /// <summary>
     ///  The main entry point for the application.
     /// </summary>
     [STAThread]
-    static void Main()
+    private static void Main()
     {
         try
         {
@@ -24,9 +27,17 @@ static class Program
                         MessageBoxIcon.Warning);
                     return;
                 }
+                
+                // set up appsettings configuration
+                var configuration = new ConfigurationBuilder()
+                    .SetBasePath(AppContext.BaseDirectory)
+                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                    .Build();
 
+                var rootConfig = configuration.Get<RootConfig>();
+                
                 ApplicationConfiguration.Initialize();
-                Application.Run(new FluxProDisplayTray());
+                Application.Run(new FluxProDisplayTray(rootConfig!));
             }
         }
         catch (Exception ex)

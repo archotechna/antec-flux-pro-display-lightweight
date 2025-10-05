@@ -4,25 +4,23 @@ namespace FluxProDisplay;
 
 public class HardwareMonitor
 {
-    public readonly Computer Computer;
+    private readonly Computer _computer;
 
     public HardwareMonitor()
     {
-        // change this in the future to be configurable.
-        Computer = new Computer()
+        _computer = new Computer()
         {
             IsCpuEnabled = true,
             IsGpuEnabled = true
         };
 
-        Computer.Open();
-        Computer.Accept(new UpdateVisitor());
+        _computer.Open();
+        _computer.Accept(new UpdateVisitor());
     }
 
     public float? GetCpuTemperature()
     {
-
-        foreach (var hardware in Computer.Hardware)
+        foreach (var hardware in _computer.Hardware)
         {
             if (hardware.HardwareType == HardwareType.Cpu)
             {
@@ -43,7 +41,7 @@ public class HardwareMonitor
 
     public float? GetGpuTemperature()
     {
-        foreach (var hardware in Computer.Hardware)
+        foreach (var hardware in _computer.Hardware)
         {
             if (hardware.HardwareType is HardwareType.GpuNvidia or HardwareType.GpuAmd or HardwareType.GpuIntel)
             {
