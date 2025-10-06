@@ -13,6 +13,9 @@
 
     <ItemGroup>
       <PackageReference Include="hidlibrary" Version="3.3.40" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.9" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.9" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.9" />
       <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.5-pre453" />
       <PackageReference Include="System.Management" Version="9.0.9" />
       <PackageReference Include="System.Threading" Version="4.3.0" />
@@ -30,6 +33,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="assets\icon_disconnected.ico">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="appsettings.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

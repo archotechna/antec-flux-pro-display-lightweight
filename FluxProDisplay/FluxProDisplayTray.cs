@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using FluxProDisplay.DTOs.AppSettings;
 using HidLibrary;
 using Microsoft.Win32.TaskScheduler;
 using Task = System.Threading.Tasks.Task;
@@ -8,38 +9,45 @@ namespace FluxProDisplay;
 
 public partial class FluxProDisplayTray : Form
 {
-    public HardwareMonitor Monitor;
-    public bool ConnectionStatus = false;
-    public ToolStripLabel? ConnectionStatusLabel;
-    public ToolStripMenuItem? StartupToggleMenuItem;
-    public string AppName = "FluxProDisplay";
-    const string TaskName = "FluxProDisplayElevatedTask";
-
-    // offload to appsettings
-    private const int PollingInterval = 1;
-    private const int VendorId = 0x2022;
-    private const int ProductId = 0x0522;
+    private readonly HardwareMonitor _monitor;
+    private ToolStripLabel? _connectionStatusLabel;
+    private ToolStripMenuItem? _startupToggleMenuItem;
+    private const string ElevatedTaskName = "FluxProDisplayElevatedTask";
+    
+    // app settings
+    private readonly string _appName;
+    private readonly string _version;
+    private readonly int _pollingInterval;
+    private readonly int _vendorId;
+    private readonly int _productId;
 
     // other UI components for the tab
     private NotifyIcon _appStatusNotifyIcon = null!;
     private Container _component = null!;
     private ContextMenuStrip _contextMenuStrip = null!;
 
-    public FluxProDisplayTray()
+    public FluxProDisplayTray(RootConfig configuration)
     {
-        InitializeComponent();
-
-        // check if iUnity is running to prevent conflicts.
+        // check if iUnity is running to prevent conflicts before doing anything else
         CheckForIUnity();
-
-        Monitor = new HardwareMonitor();
+        
+        InitializeComponent();
+        
+        _monitor = new HardwareMonitor();
+        
+        // initialize variables from config file for easier changing
+        _appName = configuration.AppInfo.Info;
+        _version = configuration.AppInfo.Version;
+        _pollingInterval = configuration.AppSettings.PollingInterval;
+        _vendorId = configuration.AppSettings.VendorIdInt;
+        _productId = configuration.AppSettings.ProductIdInt;
 
         SetUpTrayIcon();
 
         _ = WriteToDisplay();
     }
 
-    private void CheckForIUnity()
+    private static void CheckForIUnity()
     {
         var isRunning =
             Process.GetProcessesByName("iunity").Length > 0 ||
@@ -59,28 +67,28 @@ public partial class FluxProDisplayTray : Form
 
         _contextMenuStrip = new ContextMenuStrip();
 
-        var appNameLabel = new ToolStripLabel("Antec Flux Pro Display Service");
+        var appNameLabel = new ToolStripLabel(_appName + " " + _version);
         appNameLabel.ForeColor = Color.Gray;
         appNameLabel.Enabled = false;
         _contextMenuStrip.Items.Add(appNameLabel);
 
         _contextMenuStrip.Items.Add(new ToolStripSeparator());
 
-        ConnectionStatusLabel = new ToolStripLabel("Not Connected");
-        ConnectionStatusLabel.ForeColor = Color.Crimson;
-        ConnectionStatusLabel.Enabled = true;
-        _contextMenuStrip.Items.Add(ConnectionStatusLabel);
+        _connectionStatusLabel = new ToolStripLabel();
+        _connectionStatusLabel.ForeColor = Color.Crimson;
+        _connectionStatusLabel.Enabled = true;
+        _contextMenuStrip.Items.Add(_connectionStatusLabel);
 
         // menu items
-        StartupToggleMenuItem = new ToolStripMenuItem();
-        StartupToggleMenuItem.Click += StartupToggleMenuItemClicked;
+        _startupToggleMenuItem = new ToolStripMenuItem();
+        _startupToggleMenuItem.Click += StartupToggleMenuItemClicked;
 
         var quitMenuItem = new ToolStripMenuItem("Quit");
         quitMenuItem.Click += QuitMenuItem_Click!;
 
         // separator to separate
         _contextMenuStrip.Items.Add(new ToolStripSeparator());
-        _contextMenuStrip.Items.Add(StartupToggleMenuItem);
+        _contextMenuStrip.Items.Add(_startupToggleMenuItem);
         _contextMenuStrip.Items.Add(quitMenuItem);
 
         _appStatusNotifyIcon.ContextMenuStrip = _contextMenuStrip;
@@ -96,11 +104,11 @@ public partial class FluxProDisplayTray : Form
 
         using (var ts = new TaskService())
         {
-            var task = ts.FindTask(TaskName);
+            var task = ts.FindTask(ElevatedTaskName);
 
             if (task != null)
             {
-                ts.RootFolder.DeleteTask(TaskName);
+                ts.RootFolder.DeleteTask(ElevatedTaskName);
             }
             else
             {
@@ -113,7 +121,7 @@ public partial class FluxProDisplayTray : Form
                 td.Triggers.Add(new LogonTrigger());
                 td.Actions.Add(new ExecAction(exePath, null, Path.GetDirectoryName(exePath)));
 
-                ts.RootFolder.RegisterTaskDefinition(TaskName, td);
+                ts.RootFolder.RegisterTaskDefinition(ElevatedTaskName, td);
             }
         }
 
@@ -123,8 +131,8 @@ public partial class FluxProDisplayTray : Form
     private void UpdateStartupMenuItemText()
     {
         using var ts = new TaskService();
-        var taskEnabled = ts.FindTask(TaskName) != null;
-        StartupToggleMenuItem!.Text = taskEnabled ? "✓ Start with Windows" : "Start with Windows";
+        var taskEnabled = ts.FindTask(ElevatedTaskName) != null;
+        _startupToggleMenuItem!.Text = taskEnabled ? "✓ Start with Windows" : "Start with Windows";
     }
 
     private void QuitMenuItem_Click(object sender, EventArgs e)
@@ -148,21 +156,21 @@ public partial class FluxProDisplayTray : Form
     private async Task WriteToDisplay()
     {
         // interval of 1 sec
-        var timer = new PeriodicTimer(TimeSpan.FromSeconds(PollingInterval));
+        var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(_pollingInterval));
 
-        var device = HidDevices.Enumerate(VendorId, ProductId).FirstOrDefault();
+        var device = HidDevices.Enumerate(_vendorId, _productId).FirstOrDefault();
 
         if (device != null)
         {
-            ConnectionStatusLabel!.Text = "Connected";
+            _connectionStatusLabel!.Text = "Connected";
             _appStatusNotifyIcon.Icon = new Icon("assets/icon_connected.ico");
-            ConnectionStatusLabel.ForeColor = Color.Green;
+            _connectionStatusLabel.ForeColor = Color.Green;
         }
         else
         {
-            ConnectionStatusLabel!.Text = "Not Connected";
+            _connectionStatusLabel!.Text = "Not Connected";
             _appStatusNotifyIcon.Icon = new Icon("assets/icon_disconnected.ico");
-            ConnectionStatusLabel.ForeColor = Color.Crimson;
+            _connectionStatusLabel.ForeColor = Color.Crimson;
         }
 
         do
@@ -189,7 +197,7 @@ public partial class FluxProDisplayTray : Form
         payload[4] = 1;
         payload[5] = 6;
 
-        return FormatDisplayPayload(payload, Monitor.GetCpuTemperature(), Monitor.GetGpuTemperature());
+        return FormatDisplayPayload(payload, _monitor.GetCpuTemperature(), _monitor.GetGpuTemperature());
     }
 
     /// <summary>
@@ -199,7 +207,7 @@ public partial class FluxProDisplayTray : Form
     /// <param name="cpuTemperature"></param>
     /// <param name="gpuTemperature"></param>
     /// <returns></returns>
-    private byte[] FormatDisplayPayload(byte[] payload, float? cpuTemperature, float? gpuTemperature)
+    private static byte[] FormatDisplayPayload(byte[] payload, float? cpuTemperature, float? gpuTemperature)
     {
         var roundedCpuTemp = Math.Round(cpuTemperature ?? 0, 1);
         var roundedGpuTemp = Math.Round(gpuTemperature ?? 0, 1);
