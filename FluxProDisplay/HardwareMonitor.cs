@@ -52,7 +52,6 @@ public class HardwareMonitor
                     if (sensor.SensorType == SensorType.Temperature &&
                         sensor.Name.Contains("GPU Core", StringComparison.OrdinalIgnoreCase))
                     {
-                        var test = sensor.Value;
                         return sensor.Value;
                     }
                 }
