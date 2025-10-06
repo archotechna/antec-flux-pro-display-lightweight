@@ -156,7 +156,7 @@ public partial class FluxProDisplayTray : Form
     private async Task WriteToDisplay()
     {
         // interval of 1 sec
-        var timer = new PeriodicTimer(TimeSpan.FromSeconds(_pollingInterval));
+        var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(_pollingInterval));
 
         var device = HidDevices.Enumerate(_vendorId, _productId).FirstOrDefault();
 

@@ -3,8 +3,8 @@
 public class AppSettings
 {
     public int PollingInterval { get; set; }
-    private string VendorId { get; set; } = null!;
-    private string ProductId { get; set; } = null!;
+    public string VendorId { get; set; } = null!;
+    public string ProductId { get; set; } = null!;
 
     public int VendorIdInt => ParseHexString(VendorId);
     public int ProductIdInt => ParseHexString(ProductId);
@@ -18,6 +18,6 @@ public class AppSettings
         if (hex.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
             hex = hex.Substring(2);
 
-        return int.Parse(hex, System.Globalization.NumberStyles.HexNumber);
+        return Convert.ToInt32(hex, 16);
     }
 }
