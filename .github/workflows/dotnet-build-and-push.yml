@@ -5,9 +5,8 @@ name: .NET
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -27,13 +26,6 @@ jobs:
       
     - name: Build and publish
       run: dotnet publish -c Release -p:SelfContained=false -o ./publish
-
-    - name: Upload published output
-      uses: actions/upload-artifact@v4.6.2
-      with:
-        name: antecfluxprodisplay
-        path: |
-          **/bin/Release/net9.0/publish/
 
     - name: Zip published output
       run: |
