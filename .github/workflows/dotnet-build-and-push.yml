@@ -25,8 +25,8 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
       
-    - name: Build and publish to executable
-      run: dotnet publish -c Release -p:SelfContained=false
+    - name: Build and publish
+      run: dotnet publish -c Release -p:SelfContained=false -o ./publish
 
     - name: Upload published output
       uses: actions/upload-artifact@v4.6.2
@@ -34,3 +34,16 @@ jobs:
         name: antecfluxprodisplay
         path: |
           **/bin/Release/net9.0/publish/
+
+    - name: Zip published output
+      run: |
+        cd publish
+        zip -r ../app.zip .
+        cd ..
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: app.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
