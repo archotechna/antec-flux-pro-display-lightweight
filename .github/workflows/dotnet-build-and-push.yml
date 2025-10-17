@@ -16,11 +16,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Setup .NET
+    
+    - name: Setup .NET Core 9
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
+        
     - name: Restore dependencies
       run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
+      
+    - name: Build and publish to executable
+      run: dotnet publish -c Release -p:SelfContained=false
+
+    - name: Upload published output
+      uses: actions/upload-artifact@v4.6.2
+      with:
+        name: antecfluxprodisplay
+        path: |
+          **/bin/Release/net9.0/publish/
