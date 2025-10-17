@@ -23,6 +23,12 @@ jobs:
         
     - name: Restore dependencies
       run: dotnet restore
+
+    - name: Update appsettings.json version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        echo "Updating appsettings.json with correct version..."
+        sed -i "s/\"Version\": *\"[^\"]*\"/\"Version\": \"$VERSION\"/" appsettings.json
       
     - name: Build and publish
       run: dotnet publish -c Release -r win-x64 -p:SelfContained=false -o ./publish
