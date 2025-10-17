@@ -24,11 +24,14 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
-    - name: Update appsettings.json version
+    - name: Update appsettings.json version and debug
       run: |
         VERSION=${GITHUB_REF#refs/tags/}
-        echo "Updating appsettings.json with correct version..."
-        sed -i "s/\"Version\": *\"[^\"]*\"/\"Version\": \"$VERSION\"/" appsettings.json
+        DEBUG=false
+        echo "Updating appsettings.json file with version: $VERSION and debug set to: $DEBUG"
+        jq --arg ver "$VERSION" --argjson dbg $DEBUG \
+           '.AppInfo.Version = $ver | .AppInfo.Debug = $dbg' \
+           FluxProDisplay/appsettings.json > tmp.json && mv tmp.json FluxProDisplay/appsettings.json
       
     - name: Build and publish
       run: dotnet publish -c Release -r win-x64 -p:SelfContained=false -o ./publish
