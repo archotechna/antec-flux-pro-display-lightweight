@@ -30,7 +30,7 @@ jobs:
     - name: Zip published output
       run: |
         cd publish
-        zip -r ../app.zip .
+        zip -r ../antecfluxprodisplay.zip .
         cd ..
 
     - name: Create GitHub Release
