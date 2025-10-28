@@ -34,11 +34,11 @@ jobs:
            FluxProDisplay/appsettings.json > tmp.json && mv tmp.json FluxProDisplay/appsettings.json
       
     - name: Build and publish
-      run: dotnet publish -c Release -r win-x64 -p:SelfContained=false -o ./publish
+      run: dotnet publish -c Release -r win-x64 -p:SelfContained=false --property:PublishDir=$(pwd)/publish
 
     - name: Zip published output
       run: |
-        cd publish
+        cd $(pwd)/publish
         zip -r ../antecfluxprodisplay.zip .
         cd ..
 
