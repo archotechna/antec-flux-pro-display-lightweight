@@ -8,7 +8,7 @@ Requires Administrator privileges in order to fetch CPU and GPU data from libre 
 1. You will need to install the PawnIO driver from here first: https://pawnio.eu
 2. Next, download the latest release of the display software [here](https://github.com/archotechna/antec-flux-pro-display-lightweight/releases/latest)
 3. Installation location is up to you, but you can extract and move the files to `C:\Program Files` and just launch it from in there.
-4. That is it! The app will appear on the bottom right in the [system tray](https://dsurf.net/windows-11-training/system-tray-in-windows-11/) area.
+4. That is it! The app will appear on the bottom right in the [system tray](https://dsurf.net/images/W11-HiddenIcons01-B.png) area.
 
 ## Notes and Information
 ### Dependencies
