@@ -34,7 +34,7 @@ jobs:
            FluxProDisplay/appsettings.json > tmp.json && mv tmp.json FluxProDisplay/appsettings.json
       
     - name: Build and publish
-      run: dotnet publish -c Release -r win-x64 -p:SelfContained=false -o ./publish
+      run: dotnet publish -c Release -r win-x64 -p:SelfContained=false --property:PublishDir=./publish
 
     - name: Zip published output
       run: |
