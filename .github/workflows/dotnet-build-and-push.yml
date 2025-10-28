@@ -38,6 +38,7 @@ jobs:
 
     - name: Zip published output
       run: |
+        ls -al
         cd publish
         zip -r ../antecfluxprodisplay.zip .
         cd ..
